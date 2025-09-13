@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: Search Engine Service API
+  version: "1.0.0"
+  description: |
+    Keyword search over unified contents with Meilisearch via Laravel Scout.
+servers:
+  - url: http://localhost:8000
+paths:
+  /api/contents:
+    get:
+      summary: List contents with search, filters, sort, and pagination
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+          description: Search term (title)
+        - in: query
+          name: type
+          schema: { type: string, enum: [video, article] }
+          description: Filter by content type
+        - in: query
+          name: sort
+          schema: { type: string, enum: [final_score, published_at], default: final_score }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: desc }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: per_page
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedContent"
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: "01JD4W8ZQ0K3EN9E1F6H7C2V71"
+                        title: "PHP Article"
+                        type: "article"
+                        tags: ["php","backend"]
+                        final_score: 36.8
+                        published_at: "2025-09-01T00:00:00Z"
+                    links:
+                      first: "http://localhost:8000/api/contents?page=1"
+                      last: "http://localhost:8000/api/contents?page=10"
+                      prev: null
+                      next: "http://localhost:8000/api/contents?page=2"
+                    meta:
+                      current_page: 1
+                      from: 1
+                      last_page: 10
+                      path: "http://localhost:8000/api/contents"
+                      per_page: 20
+                      to: 20
+                      total: 200
+components:
+  schemas:
+    Content:
+      type: object
+      properties:
+        id: { type: string, description: "ULID" }
+        title: { type: string, maxLength: 512 }
+        type: { type: string, enum: [video, article] }
+        tags:
+          type: array
+          items: { type: string }
+        final_score: { type: number, format: float }
+        published_at: { type: string, format: date-time, nullable: true }
+    PaginatedContent:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Content"
+        links:
+          type: object
+          additionalProperties: true
+        meta:
+          type: object
+          properties:
+            current_page: { type: integer }
+            from: { type: integer, nullable: true }
+            last_page: { type: integer }
+            path: { type: string }
+            per_page: { type: integer }
+            to: { type: integer, nullable: true }
+            total: { type: integer }
