@@ -6,6 +6,7 @@ use App\DTO\ContentDTO;
 use App\DTO\ScoreDTO;
 use App\Models\Content;
 use App\Models\Provider;
+use App\Support\ContentHash;
 use Illuminate\Support\Facades\DB;
 
 final class ContentRepository
@@ -13,23 +14,41 @@ final class ContentRepository
     public function upsertFromDTO(ContentDTO $dto): Content
     {
         return DB::transaction(function () use ($dto) {
-            // Normalize provider to a Provider record
             $provider = Provider::firstOrCreate(
                 ['slug' => $dto->provider],
                 ['name' => ucfirst(str_replace(['_', '-'], ' ', $dto->provider))]
             );
 
-            return Content::updateOrCreate(
-                ['provider_id' => $provider->id, 'provider_item_id' => $dto->providerItemId],
-                [
-                    'provider_id'  => $provider->id,
-                    'title'        => $dto->title,
-                    'type'         => $dto->type,
-                    'published_at' => $dto->publishedAt,
-                    'tags'         => $dto->tags,
-                    'metrics'      => $this->packMetrics($dto),
-                ]
-            );
+            $canonicalPayload = $this->makeCanonicalPayload($dto);
+            $hash             = ContentHash::canonicalHash($canonicalPayload);
+
+            /** @var Content|null $existing */
+            $existing = Content::where('provider_id', $provider->id)
+                ->where('provider_item_id', $dto->providerItemId)
+                ->first();
+
+            if ($existing && $existing->content_hash === $hash) {
+                $existing->fill(['synced_at' => now()])->saveQuietly();
+                return $existing->refresh();
+            }
+
+            $attributes = [
+                'provider_id'      => $provider->id,
+                'provider_item_id' => $dto->providerItemId,
+
+                ...$canonicalPayload,
+
+                'content_hash' => $hash,
+                'synced_at'    => now()
+            ];
+
+
+            if ($existing) {
+                $existing->fill($attributes)->save();
+                return $existing->refresh();
+            }
+
+            return Content::create($attributes);
         });
     }
 
@@ -40,6 +59,17 @@ final class ContentRepository
         $c->engagement_score = $s->engagement;
         $c->final_score      = $s->final;
         $c->save();
+    }
+
+    private function makeCanonicalPayload(ContentDTO $dto): array
+    {
+        return [
+            'title'        => $dto->title,
+            'type'         => $dto->type,
+            'metrics'      => $this->packMetrics($dto),
+            'published_at' => $dto->publishedAt,
+            'tags'         => $dto->tags,
+        ];
     }
 
     private function packMetrics(ContentDTO $dto): array
