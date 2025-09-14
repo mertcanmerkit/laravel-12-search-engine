@@ -26,6 +26,8 @@ class Content extends Model
         'freshness_score',
         'engagement_score',
         'final_score',
+        'content_hash',
+        'synced_at',
     ];
 
     protected $casts = [
