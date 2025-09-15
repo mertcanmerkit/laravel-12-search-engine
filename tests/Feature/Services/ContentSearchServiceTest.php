@@ -16,7 +16,7 @@ class ContentSearchServiceTest extends TestCase
     #[Test]
     public function returns_cached_paginated_results(): void
     {
-        $pXml = Provider::create(['slug' => 'xml_provider', 'name' => 'XML Provider']);
+        $pXml = Provider::factory()->xml()->create();
 
         Content::create([
             'provider_id' => $pXml->id,

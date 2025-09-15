@@ -17,8 +17,8 @@ class ContentSearchTableTest extends TestCase
     #[Test]
     public function filters_and_sorts(): void
     {
-        $pJson = Provider::create(['slug' => 'json_provider', 'name' => 'JSON Provider']);
-        $pXml  = Provider::create(['slug' => 'xml_provider',  'name' => 'XML Provider']);
+        $pJson = Provider::factory()->json()->create();
+        $pXml  = Provider::factory()->xml()->create();
 
         Content::create([
             'provider_id' => $pJson->id, 'provider_item_id' => 'v1',

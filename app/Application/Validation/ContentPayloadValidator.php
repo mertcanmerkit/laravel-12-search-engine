@@ -12,7 +12,7 @@ final class ContentPayloadValidator
     public function validate(array $raw): array
     {
         $base = Validator::make($raw, [
-            'provider'         => ['required','string'],
+            'provider_id'      => ['required','integer'],
             'provider_item_id' => ['required','string'],
             'title'            => ['required','string'],
             'type'             => ['required','in:video,article'],

@@ -14,7 +14,7 @@ class ContentDTOFactoryTest extends TestCase
     public function makes_video_dto(): void
     {
         $valid = [
-            'provider'         => 'json_provider',
+            'provider_id'      => 1,
             'provider_item_id' => 'v1',
             'title'            => 'Video Title',
             'type'             => 'video',
@@ -25,7 +25,7 @@ class ContentDTOFactoryTest extends TestCase
 
         $dto = (new ContentDTOFactory())->make($valid);
 
-        $this->assertSame('json_provider', $dto->provider);
+        $this->assertSame(1, $dto->providerId);
         $this->assertSame('v1', $dto->providerItemId);
         $this->assertSame('video', $dto->type);
         $this->assertSame(['php','laravel'], $dto->tags);
@@ -39,7 +39,7 @@ class ContentDTOFactoryTest extends TestCase
     public function makes_article_dto(): void
     {
         $valid = [
-            'provider'         => 'xml_provider',
+            'provider_id'      => 1,
             'provider_item_id' => 'a1',
             'title'            => 'Article Title',
             'type'             => 'article',
@@ -50,7 +50,7 @@ class ContentDTOFactoryTest extends TestCase
 
         $dto = (new ContentDTOFactory())->make($valid);
 
-        $this->assertSame('xml_provider', $dto->provider);
+        $this->assertSame(1, $dto->providerId);
         $this->assertSame('a1', $dto->providerItemId);
         $this->assertSame('article', $dto->type);
         $this->assertSame(['backend'], $dto->tags);

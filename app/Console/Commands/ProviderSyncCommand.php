@@ -8,19 +8,16 @@ use Illuminate\Support\Facades\Cache;
 
 class ProviderSyncCommand extends Command
 {
-    protected $signature = 'provider:sync {--per-page=50} {--max-pages=1}';
-    protected $description = 'Fetches data from providers';
+    protected $signature = 'provider:sync {--provider=} {--per-page=10}';
+    protected $description = 'Kick off provider sync via queue';
 
-    public function handle(ProviderSyncService $service): int
+    public function handle(ProviderSyncService $svc): int
     {
-        $perPage  = (int) $this->option('per-page');
-        $maxPages = (int) $this->option('max-pages');
-
-        $summary = $service->runOnce($perPage, $maxPages);
-
-        Cache::tags(['contents'])->flush();
-
-        $this->info("Processed: {$summary['processed']} | Skipped: {$summary['skipped']}");
+        $svc->kickoff(
+            $this->option('provider') ?: null,
+            (int) $this->option('per-page')
+        );
+        $this->info('Sync started.');
         return self::SUCCESS;
     }
 }

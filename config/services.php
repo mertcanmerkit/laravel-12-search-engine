@@ -14,12 +14,6 @@ return [
     |
     */
 
-    'providers' => [
-        'json_url' => env('PROVIDER_JSON_URL'),
-        'xml_url'  => env('PROVIDER_XML_URL'),
-        'rate_per_minute' => env('PROVIDER_RATE_PER_MINUTE', 60),
-    ],
-
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
