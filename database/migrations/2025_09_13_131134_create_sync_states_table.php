@@ -9,27 +9,15 @@ return new class extends Migration {
     {
         Schema::create('sync_states', function (Blueprint $table) {
             $table->id();
-
-            $table->unsignedBigInteger('provider_id')->nullable()->index();
-            $table->string('provider_key', 191)->nullable()->index();
-
-            $table->json('cursor')->nullable();
-            $table->timestampTz('since')->nullable();
-
-            $table->unsignedInteger('last_page')->nullable()->default(0);
-
-            $table->timestampTz('last_success_at')->nullable();
-
+            $table->unsignedBigInteger('provider_id')->unique();
+            $table->unsignedInteger('next_page')->nullable();
+            $table->timestamp('last_synced_at')->nullable();
             $table->timestamps();
-
-            $table->index(['provider_id', 'provider_key']);
         });
     }
 
     public function down(): void
     {
-        if (Schema::hasTable('sync_states')) {
-            Schema::drop('sync_states');
-        }
+        Schema::dropIfExists('sync_states');
     }
 };

@@ -12,6 +12,12 @@ class Provider extends Model
     protected $fillable = [
         'slug',
         'name',
+        'base_url',
+        'rate_per_minute',
+    ];
+
+    protected $casts = [
+        'rate_per_minute' => 'integer',
     ];
 
     public function contents()

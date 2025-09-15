@@ -15,8 +15,8 @@ class ContentsIndexTest extends TestCase
     #[Test]
     public function lists_paginated_contents_with_filters_and_sort(): void
     {
-        $pJson = Provider::create(['slug' => 'json_provider', 'name' => 'JSON Provider']);
-        $pXml  = Provider::create(['slug' => 'xml_provider',  'name' => 'XML Provider']);
+        $pJson = Provider::factory()->json()->create();
+        $pXml  = Provider::factory()->xml()->create();
 
         Content::create([
             'provider_id' => $pJson->id,
@@ -55,7 +55,7 @@ class ContentsIndexTest extends TestCase
     #[Test]
     public function applies_query_search_fallback_on_db(): void
     {
-        $pJson = Provider::create(['slug' => 'json_provider', 'name' => 'JSON Provider']);
+        $pJson = Provider::factory()->json()->create();
 
         Content::create([
             'provider_id' => $pJson->id,

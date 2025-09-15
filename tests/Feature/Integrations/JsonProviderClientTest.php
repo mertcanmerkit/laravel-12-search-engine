@@ -36,7 +36,6 @@ class JsonProviderClientTest extends TestCase
         $this->assertSame(50, $page->perPage);
         $this->assertNull($page->nextPage);
         $this->assertCount(1, $page->items);
-        $this->assertSame('json_provider', $page->items[0]['provider']);
         $this->assertSame('v1', $page->items[0]['provider_item_id']);
 
         // streamAll yields raw items

@@ -23,7 +23,7 @@ final class ContentDTOFactory
             );
 
         return new ContentDTO(
-            provider:        (string)$valid['provider'],
+            providerId:      (int)$valid['provider_id'],
             providerItemId:  (string)$valid['provider_item_id'],
             title:           (string)$valid['title'],
             type:            (string)$valid['type'], // 'video'|'article'

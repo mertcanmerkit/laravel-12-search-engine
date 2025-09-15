@@ -7,7 +7,7 @@ use Carbon\Carbon;
 final class ContentDTO
 {
     public function __construct(
-        public string $provider,
+        public int $providerId,
         public string $providerItemId,
         public string $title,
         /** @var 'video'|'article' */

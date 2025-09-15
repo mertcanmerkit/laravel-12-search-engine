@@ -17,7 +17,7 @@ class TagSyncServiceTest extends TestCase
     #[Test]
     public function creates_missing_tags_and_syncs_pivot_and_jsonb(): void
     {
-        $pJson = Provider::create(['slug' => 'json_provider', 'name' => 'JSON Provider']);
+        $pJson = Provider::factory()->json()->create();
         $content = Content::create([
             'provider_id' => $pJson->id,
             'provider_item_id' => 'X1',
@@ -41,7 +41,7 @@ class TagSyncServiceTest extends TestCase
     #[Test]
     public function normalizes_and_limits_names(): void
     {
-        $pJson = Provider::create(['slug' => 'json_provider', 'name' => 'JSON Provider']);
+        $pJson = Provider::factory()->json()->create();
         $content = Content::create([
             'provider_id' => $pJson->id,
             'provider_item_id' => 'X2',
@@ -67,7 +67,7 @@ class TagSyncServiceTest extends TestCase
         $t1 = Tag::create(['name' => 'php', 'slug' => 'php']);
         $t2 = Tag::create(['name' => 'laravel', 'slug' => 'laravel']);
 
-        $pXml = Provider::create(['slug' => 'xml_provider', 'name' => 'XML Provider']);
+        $pXml = Provider::factory()->xml()->create();
         $content = Content::create([
             'provider_id' => $pXml->id,
             'provider_item_id' => 'X3',

@@ -20,7 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('provider:sync')
-            ->everyTenMinutes()
+            ->everyMinute()
             ->withoutOverlapping();
+
+        $schedule->command('horizon:snapshot')->everyFiveMinutes();
     })
     ->create();

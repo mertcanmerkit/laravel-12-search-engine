@@ -12,7 +12,7 @@ class ContentPayloadValidatorTest extends TestCase
     public function validates_and_normalizes_video_payload(): void
     {
         $raw = [
-            'provider'         => 'json_provider',
+            'provider_id'      => 1,
             'provider_item_id' => 'v1',
             'title'            => 'Video Title',
             'type'             => 'video',
@@ -34,7 +34,7 @@ class ContentPayloadValidatorTest extends TestCase
     public function validates_and_normalizes_article_payload(): void
     {
         $raw = [
-            'provider'         => 'xml_provider',
+            'provider_id'      => 1,
             'provider_item_id' => 'a1',
             'title'            => 'Article Title',
             'type'             => 'article',
@@ -56,7 +56,7 @@ class ContentPayloadValidatorTest extends TestCase
         $this->expectException(\Illuminate\Validation\ValidationException::class);
 
         $raw = [
-            'provider'         => 'json_provider',
+            'provider_id'      => 1,
             'provider_item_id' => 'bad',
             'title'            => 'X',
             'type'             => 'video',
@@ -71,7 +71,7 @@ class ContentPayloadValidatorTest extends TestCase
     public function limits_and_deduplicates_tags(): void
     {
         $raw = [
-            'provider'         => 'json_provider',
+            'provider_id'      =>  1,
             'provider_item_id' => 't1',
             'title'            => 'T',
             'type'             => 'article',

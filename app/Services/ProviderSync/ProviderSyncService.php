@@ -2,63 +2,45 @@
 
 namespace App\Services\ProviderSync;
 
-use App\Application\Factories\ContentDTOFactory;
-use App\Application\Validation\ContentPayloadValidator;
-use App\Integrations\Providers\JsonProviderClient;
-use App\Integrations\Providers\XmlProviderClient;
-use App\Repositories\ContentRepository;
-use App\Services\ScoringService;
-use App\Services\TagSyncService;
-use Illuminate\Support\Facades\Log;
+use App\Jobs\FetchProviderPage;
+use App\Models\Provider;
+use App\Models\SyncState;
+use Illuminate\Support\Facades\Cache;
 
 final class ProviderSyncService
 {
-    public function __construct(
-        private JsonProviderClient $jsonClient,
-        private XmlProviderClient $xmlClient,
-        private ContentPayloadValidator $validator,
-        private ContentDTOFactory $factory,
-        private ContentRepository $repository,
-        private ScoringService $scoring,
-        private TagSyncService $tags,
-    ) {}
-
-    public function runOnce(int $perPage = 50, int $maxPages = 1): array
+    /**
+     * Start/resume sync by enqueuing the next page per provider.
+     * @param string|null $onlyProviderSlug
+     * @param int $perPage
+     */
+    public function kickoff(?string $onlyProviderSlug = null, int $perPage = 10): void
     {
-        $processed = 0;
-        $skipped   = 0;
+        $providers = Provider::query()
+            ->when($onlyProviderSlug, fn($q) => $q->where('slug', $onlyProviderSlug))
+            ->get(['id','slug']);
 
-        foreach ([$this->jsonClient, $this->xmlClient] as $client) {
-            foreach ($client->streamAll(1, $perPage, $maxPages) as $raw) {
-                try {
-                    $valid   = $this->validator->validate($raw);
-                    $dto     = $this->factory->make($valid);
-                    $content = $this->repository->upsertFromDTO($dto);
+        foreach ($providers as $p) {
+            $lock = Cache::lock("sync:provider:{$p->slug}", 30);
 
-                    $scores = $this->scoring->compute($content);
-                    $this->repository->applyScores($content, $scores);
-
-                    $this->tags->sync($content, $dto->tags);
-
-                    $processed++;
-                } catch (\Illuminate\Validation\ValidationException $e) {
-                    $skipped++;
-                    Log::warning('provider_sync.skip', [
-                        'provider'         => $raw['provider'] ?? 'unknown',
-                        'provider_item_id' => $raw['provider_item_id'] ?? null,
-                        'reason'           => $e->getMessage(),
-                    ]);
-                } catch (\Throwable $e) {
-                    $skipped++;
-                    Log::error('provider_sync.error', [
-                        'provider' => $raw['provider'] ?? 'unknown',
-                        'error'    => $e->getMessage(),
-                    ]);
-                }
+            if (! $lock->get()) {
+                continue;
             }
-        }
 
-        Log::info('provider_sync.summary', compact('processed', 'skipped'));
-        return compact('processed', 'skipped');
+            $state = SyncState::firstOrCreate(
+                ['provider_id' => $p->id],
+                ['next_page' => 1]
+            );
+
+            $page = $state->next_page ?? 1;
+
+            FetchProviderPage::dispatch(
+                providerId: $p->id,
+                providerSlug: $p->slug,
+                page: $page,
+                perPage: $perPage
+            //)->onQueue("sync-{$p->slug}");
+            )->onQueue("sync");
+        }
     }
 }

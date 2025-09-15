@@ -14,16 +14,11 @@ final class ContentRepository
     public function upsertFromDTO(ContentDTO $dto): Content
     {
         return DB::transaction(function () use ($dto) {
-            $provider = Provider::firstOrCreate(
-                ['slug' => $dto->provider],
-                ['name' => ucfirst(str_replace(['_', '-'], ' ', $dto->provider))]
-            );
-
             $canonicalPayload = $this->makeCanonicalPayload($dto);
             $hash             = ContentHash::canonicalHash($canonicalPayload);
 
             /** @var Content|null $existing */
-            $existing = Content::where('provider_id', $provider->id)
+            $existing = Content::where('provider_id', $dto->providerId)
                 ->where('provider_item_id', $dto->providerItemId)
                 ->first();
 
@@ -33,7 +28,7 @@ final class ContentRepository
             }
 
             $attributes = [
-                'provider_id'      => $provider->id,
+                'provider_id'      => $dto->providerId,
                 'provider_item_id' => $dto->providerItemId,
 
                 ...$canonicalPayload,

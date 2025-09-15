@@ -15,6 +15,8 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('slug', 64)->unique();
             $table->string('name', 128)->nullable();
+            $table->string('base_url', 1024)->default('https://example.test');
+            $table->unsignedInteger('rate_per_minute')->default(60);
             $table->timestamps();
         });
     }

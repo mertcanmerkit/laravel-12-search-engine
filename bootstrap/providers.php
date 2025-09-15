@@ -2,5 +2,5 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\ProviderIntegrationServiceProvider::class,
+    App\Providers\HorizonServiceProvider::class,
 ];

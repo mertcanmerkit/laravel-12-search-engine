@@ -7,6 +7,7 @@ use App\DTO\ContentDTO;
 use App\DTO\ScoreDTO;
 use App\DTO\VideoMetricsDTO;
 use App\Models\Content;
+use App\Models\Provider;
 use App\Repositories\ContentRepository;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,13 +18,21 @@ class ContentRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    private int $providerId;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->providerId = Provider::factory()->json()->create()->id;
+    }
+
     #[Test]
     public function upsert_creates_and_updates_video(): void
     {
         $repo = new ContentRepository();
 
         $dto1 = new ContentDTO(
-            provider: 'json_provider',
+            providerId: $this->providerId,
             providerItemId: 'v1',
             title: 'Video Title',
             type: 'video',
@@ -38,7 +47,7 @@ class ContentRepositoryTest extends TestCase
         $this->assertSame('Video Title', $created->title);
 
         $dto2 = new ContentDTO(
-            provider: 'json_provider',
+            providerId: $this->providerId,
             providerItemId: 'v1', // same pair → update
             title: 'Video Title (Updated)',
             type: 'video',
@@ -60,7 +69,7 @@ class ContentRepositoryTest extends TestCase
         $repo = new ContentRepository();
 
         $dto = new ContentDTO(
-            provider: 'xml_provider',
+            providerId: $this->providerId,
             providerItemId: 'a1',
             title: 'Article',
             type: 'article',
@@ -87,7 +96,7 @@ class ContentRepositoryTest extends TestCase
         $repo = new ContentRepository();
 
         $dto = new ContentDTO(
-            provider: 'json_provider',
+            providerId: $this->providerId,
             providerItemId: 'x1',
             title: 'T',
             type: 'video',
@@ -107,7 +116,7 @@ class ContentRepositoryTest extends TestCase
         $repo = new ContentRepository();
 
         $dto = new ContentDTO(
-            provider: 'json_provider',
+            providerId: $this->providerId,
             providerItemId: 'v-sync-1',
             title: 'Same Title',
             type: 'video',
@@ -137,7 +146,7 @@ class ContentRepositoryTest extends TestCase
         $repo = new ContentRepository();
 
         $dto1 = new ContentDTO(
-            provider: 'json_provider',
+            providerId: $this->providerId,
             providerItemId: 'v-sync-2',
             title: 'Old',
             type: 'video',
@@ -153,7 +162,7 @@ class ContentRepositoryTest extends TestCase
         Carbon::setTestNow(now()->addSeconds(2));
 
         $dto2 = new ContentDTO(
-            provider: 'json_provider',
+            providerId: $this->providerId,
             providerItemId: 'v-sync-2',
             title: 'New', // changed
             type: 'video',

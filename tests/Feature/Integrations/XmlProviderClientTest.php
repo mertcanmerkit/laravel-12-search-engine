@@ -49,7 +49,6 @@ XML;
         $this->assertSame(50, $page->perPage);
         $this->assertNull($page->nextPage);
         $this->assertCount(1, $page->items);
-        $this->assertSame('xml_provider', $page->items[0]['provider']);
         $this->assertSame('a1', $page->items[0]['provider_item_id']);
         $this->assertSame('article', $page->items[0]['type']);
         $this->assertSame(['Backend','PHP'], $page->items[0]['tags']);
